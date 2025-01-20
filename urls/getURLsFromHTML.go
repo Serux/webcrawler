@@ -29,10 +29,17 @@ func check_children_r(n *html.Node, URL *url.URL) ([]string, error) {
 	for v := range n.ChildNodes() {
 
 		if v.Data == "a" {
-			//fmt.Println(v.Data)
-			//fmt.Println(v.Attr[0].Val)
-			nu, _ := NormalizeURL(v.Attr[0].Val)
-			U, _ := url.Parse(v.Attr[0].Val)
+			if len(v.Attr) < 1 {
+				continue
+			}
+			nu, err := NormalizeURL(v.Attr[0].Val)
+			if err != nil {
+				return nil, err
+			}
+			U, err := url.Parse(v.Attr[0].Val)
+			if err != nil {
+				return nil, err
+			}
 			if U.Host == "" {
 				nu = URL.Host + nu
 			}
