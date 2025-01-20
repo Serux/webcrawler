@@ -23,7 +23,7 @@ func NormalizeURL(s string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return u.Host + u.Path, nil
+	return u.Host + "/" + u.Path, nil
 }
 
 func GetHTML(rawURL string) (string, error) {
@@ -49,12 +49,14 @@ func GetHTML(rawURL string) (string, error) {
 }
 
 func (cfg *Config) CrawlPage(rawCurrentURL string) {
-
+	fmt.Println("Crawling: ", rawCurrentURL)
 	if cfg.MaxPagesReached() {
+		//fmt.Println("Max pages reached: ")
 		return
 	}
 
 	if !strings.Contains(rawCurrentURL, cfg.BaseURL.String()) {
+		//fmt.Println("URL is for another web: ")
 		return
 	}
 
@@ -63,7 +65,7 @@ func (cfg *Config) CrawlPage(rawCurrentURL string) {
 		return
 	}
 
-	fmt.Println("Crawling: ", rawCurrentURL)
+	//fmt.Println("Crawling: ", rawCurrentURL)
 	webHtml, err := GetHTML(rawCurrentURL)
 	if err != nil {
 		fmt.Println(err)
@@ -92,6 +94,7 @@ func (cfg *Config) CrawlPage(rawCurrentURL string) {
 func (cfg *Config) addPageVisit(normalizedURL string) (isFirst bool) {
 	cfg.Mu.Lock()
 	defer cfg.Mu.Unlock()
+	fmt.Println("adding: ", normalizedURL)
 
 	_, ok := cfg.Pages[normalizedURL]
 	if ok {

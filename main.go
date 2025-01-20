@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"sort"
 	"strconv"
 	"sync"
 
@@ -46,10 +47,29 @@ func main() {
 		Wg:                 &sync.WaitGroup{},
 		Maxpages:           max,
 	}
+
 	cfg.CrawlPage(a[0])
 	cfg.Wg.Wait()
-	for k, v := range cfg.Pages {
-		fmt.Println("K: ", k, " - V: ", v)
+
+	printReport(cfg.Pages, a[0])
+
+}
+
+func printReport(pages map[string]int, baseURL string) {
+	fmt.Println("=============================")
+	fmt.Printf("REPORT for %v\n", baseURL)
+	fmt.Println("=============================")
+	keys := make([]string, 0, len(pages))
+	for key := range pages {
+		keys = append(keys, key)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return pages[keys[i]] > pages[keys[j]]
+	})
+	for _, v := range keys {
+		fmt.Printf("Found %v internal links to %v\n", pages[v], v)
+		//fmt.Println("K: ", pages[v], " - V: ", v)
 	}
 
 }
