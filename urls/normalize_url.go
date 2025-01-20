@@ -15,6 +15,7 @@ type Config struct {
 	Mu                 *sync.Mutex
 	ConcurrencyControl chan struct{}
 	Wg                 *sync.WaitGroup
+	Maxpages           int
 }
 
 func NormalizeURL(s string) (string, error) {
@@ -48,6 +49,11 @@ func GetHTML(rawURL string) (string, error) {
 }
 
 func (cfg *Config) CrawlPage(rawCurrentURL string) {
+
+	if cfg.MaxPagesReached() {
+		return
+	}
+
 	if !strings.Contains(rawCurrentURL, cfg.BaseURL.String()) {
 		return
 	}
@@ -95,4 +101,10 @@ func (cfg *Config) addPageVisit(normalizedURL string) (isFirst bool) {
 	cfg.Pages[normalizedURL] = 1
 	return true
 
+}
+
+func (cfg *Config) MaxPagesReached() (maxReached bool) {
+	cfg.Mu.Lock()
+	defer cfg.Mu.Unlock()
+	return len(cfg.Pages) >= cfg.Maxpages
 }
